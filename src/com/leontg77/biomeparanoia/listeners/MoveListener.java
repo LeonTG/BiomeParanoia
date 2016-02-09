@@ -20,25 +20,25 @@ import com.leontg77.biomeparanoia.Utils;
 public class MoveListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
-	public void on(final PlayerMoveEvent event) {
-		final Location from = event.getFrom();
-		final Location to = event.getTo();
+	public void on(PlayerMoveEvent event) {
+		Location from = event.getFrom();
+		Location to = event.getTo();
 			
 		// if they move their head or pixels on the block I don't care, I only care if its a new block.
-		if (from.getBlockX() == to.getBlockX() || from.getBlockZ() == to.getBlockZ()) {
+		if (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()) {
 			return;
 		}
 		
-		final Player player = event.getPlayer();
-		final Biome biome = to.getBlock().getBiome();
+		Player player = event.getPlayer();
+		Biome biome = to.getBlock().getBiome();
 		
 		// no need to set it if its the same biome, that would just lag.
-		if (from.getBlock().getBiome().equals(biome)) {
+		if (from.getBlock().getBiome().name().equals(biome.name())) {
 			return;
 		}
 		
-		final String biomeColor = Utils.getBiomeColor(biome);
-		final String name = player.getName();
+		String biomeColor = Utils.getBiomeColor(biome);
+		String name = player.getName();
 		 
 		try {
 			// if their gamemode is spectator mode, we don't want to set a color.
