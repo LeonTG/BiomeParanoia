@@ -30,7 +30,8 @@ ___
 
 **Biome colors:**
 
-![alt tag](https://raw.github.com/LeonTG77/BiomeParanoia/blob/master/images/biomecolors.png)
+![Biome colors](images/biomecolors.png)
+
 ___
 
 **Might come:**
