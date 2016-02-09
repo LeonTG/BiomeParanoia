@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 import com.leontg77.biomeparanoia.Main;
@@ -80,6 +81,10 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 			plugin.enabled = false;
 			
 			HandlerList.unregisterAll(listener);
+			
+			for (Player online : Bukkit.getOnlinePlayers()) {
+				online.setPlayerListName(null);
+			}
 			return true;
 		}
 		
