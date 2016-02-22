@@ -1,12 +1,16 @@
 package com.leontg77.biomeparanoia;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.block.Biome;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -21,7 +25,7 @@ public class Utils {
 	/**
 	 * A set of sendable biomes to /bl.
 	 */
-	private static final Set<Biome> SENDABLE_BIOMES = ImmutableSet.of(
+	public static final Set<Biome> SENDABLE_BIOMES = ImmutableSet.of(
 			Biome.BEACH, Biome.BIRCH_FOREST, Biome.COLD_TAIGA, Biome.DESERT,
 			Biome.EXTREME_HILLS, Biome.FLOWER_FOREST, Biome.FOREST, Biome.HELL,
 			Biome.ICE_PLAINS, Biome.ICE_PLAINS_SPIKES, Biome.JUNGLE, Biome.MESA,
@@ -78,99 +82,127 @@ public class Utils {
 		return toReturn;
 	}
 	
+	public static void updatePlayers(Main plugin, List<Player> players) {
+		for (Player player : players) {
+			Biome biome = player.getLocation().getBlock().getBiome();
+			
+			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
+			String name = player.getName();
+			 
+			try {
+				// if their gamemode is spectator mode, we don't want to set a color.
+				if (player.getGameMode() == GameMode.SPECTATOR) {
+					return;
+				}
+			} catch (Exception e) {
+				// The SPECTATOR enum wasn't found that means they are not using 1.8+
+				// 1.7 or lower didnt support 16+ caracter long names.
+				player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
+				return;
+			}
+			
+			player.setPlayerListName(biomeColor + name);
+		}
+	}
+	
+	public static void updatePlayer(Player player, Main plugin) {
+		updatePlayers(plugin, ImmutableList.of(player));
+	}
+	
 	/**
 	 * Get the color of the given biome.
 	 * 
 	 * @param biome the given biome.
 	 * @return The biome color in string format.
 	 */
-	public static String getBiomeColor(final Biome biome) {
+	public static String getBiomeColor(final Biome biome, Main plugin) {
+		FileConfiguration config = plugin.getConfig();
+		
 		switch (biome) {
 		case BIRCH_FOREST:
 		case BIRCH_FOREST_HILLS:
 		case BIRCH_FOREST_HILLS_MOUNTAINS:
 		case BIRCH_FOREST_MOUNTAINS:
-			return ChatColor.YELLOW.toString() + ChatColor.BOLD;
+			return config.getString("birch_forest", "&e&l");
 		case EXTREME_HILLS:
 		case EXTREME_HILLS_MOUNTAINS:
 		case EXTREME_HILLS_PLUS:
 		case EXTREME_HILLS_PLUS_MOUNTAINS:
-			return ChatColor.GRAY.toString();
+		case SMALL_MOUNTAINS:
+		case STONE_BEACH:
+			return config.getString("extreme_hills", "&7");
 		case JUNGLE:
 		case JUNGLE_EDGE:
 		case JUNGLE_EDGE_MOUNTAINS:
 		case JUNGLE_HILLS:
 		case JUNGLE_MOUNTAINS:
-			return ChatColor.GREEN.toString() + ChatColor.BOLD;
+			return config.getString("jungle", "&a&l");
 		case MEGA_SPRUCE_TAIGA:
 		case MEGA_SPRUCE_TAIGA_HILLS:
 		case MEGA_TAIGA:
 		case MEGA_TAIGA_HILLS:
-			return ChatColor.BLUE.toString() + ChatColor.BOLD;
+			return config.getString("mega_taiga", "&3&l");
 		case MESA:
 		case MESA_BRYCE:
 		case MESA_PLATEAU:
 		case MESA_PLATEAU_FOREST:
 		case MESA_PLATEAU_FOREST_MOUNTAINS:
 		case MESA_PLATEAU_MOUNTAINS:
-			return ChatColor.DARK_RED.toString();
+			return config.getString("mesa", "&4");
 		case SAVANNA:
 		case SAVANNA_MOUNTAINS:
 		case SAVANNA_PLATEAU:
 		case SAVANNA_PLATEAU_MOUNTAINS:
-			return ChatColor.GOLD.toString();
+			return config.getString("savanna", "&6");
 		case COLD_TAIGA:
 		case COLD_TAIGA_HILLS:
 		case COLD_TAIGA_MOUNTAINS:
-			return ChatColor.BLUE.toString();
+			return config.getString("cold_taiga", "&9");
 		case TAIGA:
 		case TAIGA_HILLS:
 		case TAIGA_MOUNTAINS:
-			return ChatColor.DARK_AQUA.toString();
+			return config.getString("taiga", "&3");
 		case DEEP_OCEAN:
 		case OCEAN:
 		case FROZEN_OCEAN:
-			return ChatColor.DARK_BLUE.toString();
+			return config.getString("ocean", "&1");
 		case DESERT:
 		case DESERT_HILLS:
 		case DESERT_MOUNTAINS:
-			return ChatColor.YELLOW.toString();
+			return config.getString("desert", "&e");
 		case FLOWER_FOREST:
 		case FOREST:
 		case FOREST_HILLS:
-			return ChatColor.DARK_GREEN.toString();
+			return config.getString("forest", "&2");
 		case BEACH:
 		case COLD_BEACH:
-			return ChatColor.YELLOW.toString();
+			return config.getString("beach", "&e&o");
 		case RIVER:
 		case FROZEN_RIVER:
-			return ChatColor.AQUA.toString();
-		case SMALL_MOUNTAINS:
-		case STONE_BEACH:
-			return ChatColor.GRAY.toString();
+			return config.getString("river", "&b");
 		case PLAINS:
 		case SUNFLOWER_PLAINS:
-			return ChatColor.GREEN.toString();
+			return config.getString("plains", "&a");
 		case SWAMPLAND:
 		case SWAMPLAND_MOUNTAINS:
-			return ChatColor.DARK_GRAY.toString();
+			return config.getString("swampland", "&8");
 		case ROOFED_FOREST:
 		case ROOFED_FOREST_MOUNTAINS:
-			return ChatColor.DARK_GREEN.toString() + ChatColor.BOLD;
+			return config.getString("roofed_forest", "&2&l");
 		case MUSHROOM_ISLAND:
 		case MUSHROOM_SHORE:
-			return ChatColor.GRAY.toString() + ChatColor.ITALIC;
+			return config.getString("mushroom_island", "&7&o");
 		case ICE_MOUNTAINS:
 		case ICE_PLAINS:
-			return ChatColor.WHITE.toString();
+			return config.getString("ice_plains", "&f");
 		case ICE_PLAINS_SPIKES:
-			return ChatColor.WHITE.toString() + ChatColor.ITALIC;
+			return config.getString("ice_plains_spikes", "&f&o");
 		case HELL:
-			return ChatColor.RED.toString();
+			return config.getString("hell", "&c");
 		case SKY:
-			return ChatColor.BLACK.toString();
+			return config.getString("sky", "&0");
 		default:
-			return ChatColor.MAGIC.toString();
+			return config.getString(biome.name().toLowerCase(), "&k");
 		}
 	}
 }
