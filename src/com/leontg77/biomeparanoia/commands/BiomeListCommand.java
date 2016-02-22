@@ -2,6 +2,7 @@ package com.leontg77.biomeparanoia.commands;
 
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.block.Biome;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -50,7 +51,9 @@ public class BiomeListCommand implements CommandExecutor, TabCompleter {
 				}
 			}
 			
-			biomeList.append(Utils.getBiomeColor(biome) + Utils.capitalizeString(biome.name(), true));
+			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
+			
+			biomeList.append(biomeColor + Utils.capitalizeString(biome.name(), true));
 			i++;
 		}
 
