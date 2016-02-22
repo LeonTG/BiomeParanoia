@@ -6,6 +6,7 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.block.Biome;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -45,6 +46,45 @@ public class Utils {
 	}
 	
 	/**
+	 * Update the given list of player's tablist color.
+	 * 
+	 * @param plugin The main class.
+	 * @param players The list of players to update.
+	 */
+	public static void updatePlayers(Main plugin, List<Player> players, Location loc) {
+		for (Player player : players) {
+			Biome biome = loc == null ? player.getLocation().getBlock().getBiome() : loc.getBlock().getBiome();
+			
+			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
+			String name = player.getName();
+			 
+			try {
+				// if their gamemode is spectator mode, we don't want to set a color.
+				if (player.getGameMode() == GameMode.SPECTATOR) {
+					return;
+				}
+			} catch (Exception e) {
+				// The SPECTATOR enum wasn't found that means they are not using 1.8+
+				// 1.7 or lower didnt support 16+ caracter long names.
+				player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
+				return;
+			}
+			
+			player.setPlayerListName(biomeColor + name);
+		}
+	}
+	
+	/**
+	 * Update the given player's tablist color.
+	 * 
+	 * @param player The player to update.
+	 * @param plugin The main class.
+	 */
+	public static void updatePlayer(Player player, Location loc, Main plugin) {
+		updatePlayers(plugin, ImmutableList.of(player), loc);
+	}
+	
+	/**
 	 * Broadcasts a message to everyone online.
 	 * 
 	 * @param message the message.
@@ -80,33 +120,6 @@ public class Utils {
 		} 
 		
 		return toReturn;
-	}
-	
-	public static void updatePlayers(Main plugin, List<Player> players) {
-		for (Player player : players) {
-			Biome biome = player.getLocation().getBlock().getBiome();
-			
-			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
-			String name = player.getName();
-			 
-			try {
-				// if their gamemode is spectator mode, we don't want to set a color.
-				if (player.getGameMode() == GameMode.SPECTATOR) {
-					return;
-				}
-			} catch (Exception e) {
-				// The SPECTATOR enum wasn't found that means they are not using 1.8+
-				// 1.7 or lower didnt support 16+ caracter long names.
-				player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
-				return;
-			}
-			
-			player.setPlayerListName(biomeColor + name);
-		}
-	}
-	
-	public static void updatePlayer(Player player, Main plugin) {
-		updatePlayers(plugin, ImmutableList.of(player));
 	}
 	
 	/**

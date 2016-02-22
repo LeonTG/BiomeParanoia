@@ -42,6 +42,6 @@ public class MoveListener implements Listener {
 			return;
 		}
 		
-		Utils.updatePlayer(player, plugin);
+		Utils.updatePlayer(player, to, plugin);
 	}
 }

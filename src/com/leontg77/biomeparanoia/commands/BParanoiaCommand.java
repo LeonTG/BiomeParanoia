@@ -72,7 +72,7 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 			Bukkit.getPluginManager().registerEvents(gamemode, plugin);
 			Bukkit.getPluginManager().registerEvents(move, plugin);
 			
-			Utils.updatePlayers(plugin, ImmutableList.copyOf(Bukkit.getOnlinePlayers()));
+			Utils.updatePlayers(plugin, ImmutableList.copyOf(Bukkit.getOnlinePlayers()), null);
 			return true;
 		}
 
@@ -131,7 +131,7 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 			plugin.getConfig().set(biome.name().toLowerCase(), args[2]);
 			plugin.saveConfig();
 
-			Utils.updatePlayers(plugin, ImmutableList.copyOf(Bukkit.getOnlinePlayers()));
+			Utils.updatePlayers(plugin, ImmutableList.copyOf(Bukkit.getOnlinePlayers()), null);
 			
 			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
 			sender.sendMessage(Main.PREFIX + "The biome color was changed to " + biomeColor + Utils.capitalizeString(biome.name(), true) + "§7.");
