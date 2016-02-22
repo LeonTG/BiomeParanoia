@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Biome;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,8 +13,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
+import com.google.common.collect.ImmutableList;
 import com.leontg77.biomeparanoia.Main;
 import com.leontg77.biomeparanoia.Utils;
+import com.leontg77.biomeparanoia.listeners.GamemodeListener;
 import com.leontg77.biomeparanoia.listeners.MoveListener;
 
 /**
@@ -25,19 +28,23 @@ import com.leontg77.biomeparanoia.listeners.MoveListener;
  */
 public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 	private static final String PERMISSION = "bparanoia.manage";
+
+	private final GamemodeListener gamemode;
+	private final MoveListener move;
 	
-	private final MoveListener listener;
 	private final Main plugin;
 	
-	public BParanoiaCommand(final Main plugin, final MoveListener listener) {
-		this.listener = listener;
+	public BParanoiaCommand(Main plugin, GamemodeListener gamemode, MoveListener move) {
 		this.plugin = plugin;
+		
+		this.gamemode = gamemode;
+		this.move = move;
 	}
 	
 	@Override
 	public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(Main.PREFIX + "Usage: /bparanoia <info|enable|disable>");
+			sender.sendMessage(Main.PREFIX + "Usage: /bparanoia <info|enable|disable|setcolor>");
 			return true;
 		}
 		
@@ -61,8 +68,11 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 			
 			Utils.broadcast(Main.PREFIX + "Biome Paranoia has been enabled.");
 			plugin.enabled = true;
+
+			Bukkit.getPluginManager().registerEvents(gamemode, plugin);
+			Bukkit.getPluginManager().registerEvents(move, plugin);
 			
-			Bukkit.getPluginManager().registerEvents(listener, plugin);
+			Utils.updatePlayers(plugin, ImmutableList.copyOf(Bukkit.getOnlinePlayers()));
 			return true;
 		}
 
@@ -80,7 +90,8 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 			Utils.broadcast(Main.PREFIX + "Biome Paranoia has been disabled.");
 			plugin.enabled = false;
 			
-			HandlerList.unregisterAll(listener);
+			HandlerList.unregisterAll(gamemode);
+			HandlerList.unregisterAll(move);
 			
 			for (Player online : Bukkit.getOnlinePlayers()) {
 				online.setPlayerListName(null);
@@ -88,7 +99,46 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 			return true;
 		}
 		
-		sender.sendMessage(Main.PREFIX + "Usage: /bparanoia <info|enable|disable>");
+		if (args[0].equalsIgnoreCase("setcolor")) {
+			if (!sender.hasPermission(PERMISSION)) {
+				sender.sendMessage(ChatColor.RED + "You don't have permission.");
+				return true;
+			}
+			
+			if (!plugin.enabled) {
+				sender.sendMessage(ChatColor.RED + "Biome Paranoia is not enabled.");
+				return true;
+			}
+			
+			if (args.length < 3) {
+				sender.sendMessage(Main.PREFIX + "Usage: /bparanoia setcolor <biome> <color>");
+				return true;
+			}
+			
+			Biome biome;
+			
+			try {
+				biome = Biome.valueOf(args[1].toUpperCase());
+				
+				if (!Utils.isSendable(biome)) {
+					throw new Exception();
+				}
+			} catch (Exception e) {
+				sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a vaild biome.");
+				return true;
+			}
+			
+			plugin.getConfig().set(biome.name().toLowerCase(), args[2]);
+			plugin.saveConfig();
+
+			Utils.updatePlayers(plugin, ImmutableList.copyOf(Bukkit.getOnlinePlayers()));
+			
+			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
+			sender.sendMessage(Main.PREFIX + "The biome color was changed to " + biomeColor + Utils.capitalizeString(biome.name(), true) + "§7.");
+			return true;
+		}
+		
+		sender.sendMessage(Main.PREFIX + "Usage: /bparanoia <info|enable|disable|setcolor>");
 		return true;
 	}
 
@@ -97,21 +147,36 @@ public class BParanoiaCommand implements CommandExecutor, TabCompleter {
 		final List<String> toReturn = new ArrayList<String>();
 		final List<String> list = new ArrayList<String>();
 		
-		if (args.length != 1) {
-			return toReturn;
+		if (args.length == 1) {
+			list.add("info");
+			
+			if (sender.hasPermission(PERMISSION)) {
+				list.add("enable");
+				list.add("disable");
+				list.add("setcolor");
+			}
 		}
 		
-		list.add("info");
+		if (args.length == 2) {
+			if (sender.hasPermission(PERMISSION)) {
+				for (Biome biome : Utils.SENDABLE_BIOMES) {
+					list.add(biome.name().toLowerCase());
+				}
+			}
+		}
 		
-		if (sender.hasPermission(PERMISSION)) {
-			list.add("enable");
-			list.add("disable");
+		if (args.length == 3) {
+			if (sender.hasPermission(PERMISSION)) {
+				for (ChatColor color : ChatColor.values()) {
+					list.add("&" + color.getChar());
+				}
+			}
 		}
 
 		// make sure to only tab complete what starts with what they 
 		// typed or everything if they didn't type anything.
 		for (String str : list) {
-			if (args[0].isEmpty() || str.startsWith(args[0].toLowerCase())) {
+			if (args[args.length - 1].isEmpty() || str.startsWith(args[args.length - 1].toLowerCase())) {
 				toReturn.add(str);
 			}
 		}
