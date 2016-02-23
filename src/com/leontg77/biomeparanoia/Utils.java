@@ -64,26 +64,7 @@ public class Utils {
 	 */
 	public static void updatePlayers(Main plugin, List<Player> players, Location loc) {
 		for (Player player : players) {
-			Biome biome = loc == null ? player.getLocation().getBlock().getBiome() : loc.getBlock().getBiome();
-			
-			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
-			String name = player.getName();
-			String newPlayerListName = biomeColor + name;
-
-			if (SPECTATOR_GAMEMODE_OPTIONAL.isPresent()) {
-				// if their gamemode is spectator mode, we don't want to set a color.
-				if (player.getGameMode() == SPECTATOR_GAMEMODE_OPTIONAL.get()) {
-					return;
-				}
-			} else {
-				// The SPECTATOR enum wasn't found that means they are not using 1.8+
-				// 1.7 or lower didnt support 16+ caracter long names.
-				if (newPlayerListName.length() > 16) {
-					player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
-				}
-			}
-
-			player.setPlayerListName(newPlayerListName);
+			updatePlayer(player, loc, plugin);
 		}
 	}
 	
@@ -94,7 +75,26 @@ public class Utils {
 	 * @param plugin The main class.
 	 */
 	public static void updatePlayer(Player player, Location loc, Main plugin) {
-		updatePlayers(plugin, ImmutableList.of(player), loc);
+		Biome biome = loc == null ? player.getLocation().getBlock().getBiome() : loc.getBlock().getBiome();
+
+		String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
+		String name = player.getName();
+		String newPlayerListName = biomeColor + name;
+
+		if (SPECTATOR_GAMEMODE_OPTIONAL.isPresent()) {
+			// if their gamemode is spectator mode, we don't want to set a color.
+			if (player.getGameMode() == SPECTATOR_GAMEMODE_OPTIONAL.get()) {
+				return;
+			}
+		} else {
+			// The SPECTATOR enum wasn't found that means they are not using 1.8+
+			// 1.7 or lower didnt support 16+ caracter long names.
+			if (newPlayerListName.length() > 16) {
+				player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
+			}
+		}
+
+		player.setPlayerListName(newPlayerListName);
 	}
 	
 	/**
