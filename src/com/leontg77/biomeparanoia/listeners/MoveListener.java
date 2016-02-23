@@ -35,10 +35,11 @@ public class MoveListener implements Listener {
 		}
 		
 		Player player = event.getPlayer();
-		Biome biome = to.getBlock().getBiome();
+		Biome oldBiome = from.getBlock().getBiome();
+		Biome newBiome = to.getBlock().getBiome();
 		
 		// no need to set it if its the same biome, that would just lag.
-		if (from.getBlock().getBiome().name().equals(biome.name())) {
+		if (oldBiome == newBiome) {
 			return;
 		}
 		
