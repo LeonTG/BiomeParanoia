@@ -3,6 +3,7 @@ package com.leontg77.biomeparanoia;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Optional;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -22,7 +23,17 @@ import com.google.common.collect.ImmutableSet;
  * @author LeonTG77
  */
 public class Utils {
-	
+
+	public static final Optional<GameMode> SPECTATOR_GAMEMODE_OPTIONAL;
+
+	static {
+		GameMode spectatorGameMode = null;
+		try {
+			spectatorGameMode = GameMode.valueOf("SPECTATOR");
+		} catch (IllegalArgumentException ignored) {}
+		SPECTATOR_GAMEMODE_OPTIONAL = Optional.fromNullable(spectatorGameMode);
+	}
+
 	/**
 	 * A set of sendable biomes to /bl.
 	 */
@@ -57,20 +68,22 @@ public class Utils {
 			
 			String biomeColor = ChatColor.translateAlternateColorCodes('&', Utils.getBiomeColor(biome, plugin));
 			String name = player.getName();
-			 
-			try {
+			String newPlayerListName = biomeColor + name;
+
+			if (SPECTATOR_GAMEMODE_OPTIONAL.isPresent()) {
 				// if their gamemode is spectator mode, we don't want to set a color.
-				if (player.getGameMode() == GameMode.SPECTATOR) {
+				if (player.getGameMode() == SPECTATOR_GAMEMODE_OPTIONAL.get()) {
 					return;
 				}
-			} catch (Exception e) {
+			} else {
 				// The SPECTATOR enum wasn't found that means they are not using 1.8+
 				// 1.7 or lower didnt support 16+ caracter long names.
-				player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
-				return;
+				if (newPlayerListName.length() > 16) {
+					player.setPlayerListName(biomeColor + name.substring(0, Math.min(name.length(), 16 - biomeColor.length())));
+				}
 			}
-			
-			player.setPlayerListName(biomeColor + name);
+
+			player.setPlayerListName(newPlayerListName);
 		}
 	}
 	

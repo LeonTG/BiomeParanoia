@@ -1,5 +1,7 @@
 package com.leontg77.biomeparanoia.listeners;
 
+import com.google.common.base.Optional;
+import com.leontg77.biomeparanoia.Utils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,14 +21,10 @@ public class GamemodeListener implements Listener {
 	public void on(PlayerGameModeChangeEvent event) {
 		GameMode mode = event.getNewGameMode();
 		Player player = event.getPlayer();
-		 
-		try {
-			if (mode == GameMode.SPECTATOR) {
-				player.setPlayerListName(null);
-				return;
-			}
-		} catch (Exception e) {
-			return;
+
+		Optional<GameMode> optional = Utils.SPECTATOR_GAMEMODE_OPTIONAL;
+		if (optional.isPresent() && mode == optional.get()) {
+			player.setPlayerListName(null);
 		}
 	}
 }
