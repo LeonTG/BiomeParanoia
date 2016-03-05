@@ -228,7 +228,7 @@ public class Utils {
 		case SKY:
 			return config.getString("sky", "&0");
 		default:
-			return config.getString(biome.name().toLowerCase(), "&k");
+			return config.getString(biome.name().toLowerCase(), "&f");
 		}
 	}
 }
