@@ -21,21 +21,21 @@ public class Main extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		final PluginDescriptionFile file = getDescription();
+		PluginDescriptionFile file = getDescription();
 		getLogger().info(file.getName() + " has been disabled.");
 	}
 	
 	@Override
 	public void onEnable() {
-		final PluginDescriptionFile file = getDescription();
+		PluginDescriptionFile file = getDescription();
 		getLogger().info(file.getName() + " v" + file.getVersion() + " has been enabled.");
 		getLogger().info("The plugin is made by LeonTG77.");
 
-		final GamemodeListener gamemode = new GamemodeListener();
-		final MoveListener move = new MoveListener(this);
+		GamemodeListener gamemode = new GamemodeListener();
+		MoveListener move = new MoveListener(this);
 		
-		final BParanoiaCommand mainCommand = new BParanoiaCommand(this, gamemode, move);
-		final BiomeListCommand listCommand = new BiomeListCommand(this);
+		BParanoiaCommand mainCommand = new BParanoiaCommand(this, gamemode, move);
+		BiomeListCommand listCommand = new BiomeListCommand(this);
 		
 		// register command.
 		getCommand("bparanoia").setExecutor(mainCommand);
